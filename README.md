@@ -8,10 +8,10 @@
 ![snake_image](screenshot/snake.png)  
 
 ### How to run
-First, clone this repository to local.
-Second, run `gradle build` in project directory.
-Next, run `cd build/libs`.
-Last, run `java -jar snake-game-1.0-SNAPSHOT.jar` 
+- clone this repository to local.
+- run `gradle build` in project directory.
+- run `cd build/libs`.
+- run `java -jar snake-game-1.0-SNAPSHOT.jar` 
 
 ### Contribution
 <big>Welcome start or fork or pull an issue to me!</big>
