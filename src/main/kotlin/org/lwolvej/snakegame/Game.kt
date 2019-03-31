@@ -1,0 +1,247 @@
+package org.lwolvej.snakegame
+
+import javafx.animation.AnimationTimer
+import javafx.application.Application
+import javafx.geometry.Pos
+import javafx.scene.Group
+import javafx.scene.Scene
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.control.Button
+import javafx.scene.input.KeyCode
+import javafx.scene.layout.VBox
+import javafx.scene.text.Text
+import javafx.stage.Stage
+import java.util.*
+
+
+class Game : Application() {
+
+    lateinit var context: GraphicsContext
+
+    lateinit var snake: Snake
+
+    lateinit var grid: Grid
+
+    lateinit var animationTimer: AnimationTimer
+
+    var timer: Timer? = null
+
+    private lateinit var timerTask: TimerTask
+
+    var inProgress = false
+
+    var gameOver = false
+
+    private var paused = false
+
+    override fun start(primaryStage: Stage?) {
+
+        grid = Grid(
+            width = WIDTH,
+            height = HEIGHT,
+            pixelsPerSquare = BLOCK_SIZE
+        )
+
+        snake = Snake(
+            width = WIDTH,
+            height = HEIGHT,
+            blockSize = BLOCK_SIZE
+        )
+
+        snake.headLocation = Point(
+            x = BLOCK_SIZE,
+            y = BLOCK_SIZE
+        )
+
+        val canvas = Canvas(WIDTH.toDouble(), HEIGHT.toDouble())
+        context = canvas.graphicsContext2D
+
+
+        val button = Button().apply {
+            text = BUTTON_NAME
+            minHeight = BUTTON_HEIGHT
+            minWidth = BUTTON_WIDTH
+            setOnAction {
+                inProgress = true
+                gameOver = false
+                isVisible = false
+
+                if (timer == null) {
+                    timerTask = createTask()
+                    timer = Timer(TIMER_NAME)
+                    timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
+                    animationTimer.start()
+                }
+            }
+        }
+
+        val vBox = VBox().apply {
+            prefWidthProperty().bind(canvas.widthProperty())
+            prefHeightProperty().bind(canvas.heightProperty())
+            alignment = Pos.CENTER
+            children.add(button)
+        }
+
+        val root = Group().apply {
+            children.addAll(canvas, vBox)
+        }
+
+        val myScene = Scene(root).apply {
+            setOnKeyPressed {
+                when (it.code) {
+                    KeyCode.UP, KeyCode.W -> {
+                        if (snake.direction != Direction.DOWN) {
+                            snake.direction = Direction.UP
+                        }
+                    }
+                    KeyCode.DOWN, KeyCode.S -> {
+                        if (snake.direction != Direction.UP) {
+                            snake.direction = Direction.DOWN
+                        }
+                    }
+                    KeyCode.LEFT, KeyCode.A -> {
+                        if (snake.direction != Direction.RIGHT) {
+                            snake.direction = Direction.LEFT
+                        }
+                    }
+                    KeyCode.RIGHT, KeyCode.D -> {
+                        if (snake.direction != Direction.LEFT) {
+                            snake.direction = Direction.RIGHT
+                        }
+                    }
+                    else -> {
+                        timerTask = createTask()
+                        timer = Timer(TIMER_NAME)
+                        timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
+                        paused = true
+                    }
+                }
+            }
+        }
+
+        drawGrid()
+
+        primaryStage?.apply {
+            title = STAGE_NAME
+            scene = myScene
+        }?.show()
+
+        animationTimer = object : AnimationTimer() {
+            override fun handle(now: Long) {
+                if (inProgress) {
+                    drawGrid()
+                    drawSnake()
+                    drawFood()
+                } else if (gameOver) {
+                    animationTimer.stop()
+                    showEndGameAlert()
+                    button.isVisible = true
+                    grid.foodRest()
+                    snake = Snake(
+                        width = WIDTH,
+                        height = HEIGHT,
+                        blockSize = BLOCK_SIZE
+                    )
+                    snake.headLocation = Point(
+                        x = BLOCK_SIZE,
+                        y = BLOCK_SIZE
+                    )
+                }
+            }
+        }
+        animationTimer.start()
+
+        timerTask = createTask()
+        timer = Timer(TIMER_NAME)
+        timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
+    }
+
+    override fun stop() {
+        timer?.cancel()
+    }
+
+}
+
+private fun Game.drawFood() {
+    context.fill = FOOD_COLOR
+    context.fillRect(
+        grid.food.point.x.toDouble(),
+        grid.food.point.y.toDouble(),
+        BLOCK_SIZE.toDouble(),
+        BLOCK_SIZE.toDouble()
+    )
+}
+
+private fun Game.drawSnake() {
+    context.fill = SNAKE_COLOR
+    context.fillRect(
+        snake.headLocation.x.toDouble(),
+        snake.headLocation.y.toDouble(),
+        BLOCK_SIZE.toDouble(),
+        BLOCK_SIZE.toDouble()
+    )
+    for (element in snake.tail) {
+        context.fillRect(
+            element.x.toDouble(),
+            element.y.toDouble(),
+            BLOCK_SIZE.toDouble(),
+            BLOCK_SIZE.toDouble()
+        )
+    }
+}
+
+private fun Game.drawGrid() {
+    context.fill = BLOCK_COLOR
+    context.fillRect(0.0, 0.0, WIDTH.toDouble(), HEIGHT.toDouble())
+
+    context.stroke = LINE_COLOR
+    context.lineWidth = 0.5
+
+    for (element in 0 until WIDTH step BLOCK_SIZE) {
+        context.strokeLine(element.toDouble(), 0.0, element.toDouble(), element + HEIGHT.toDouble())
+    }
+
+    for (element in 0 until HEIGHT step BLOCK_SIZE) {
+        context.strokeLine(0.0, element.toDouble(), element + HEIGHT.toDouble(), element.toDouble())
+    }
+}
+
+private fun Game.showEndGameAlert() {
+    val text = text(snake.tail.size + 1)
+    val textWidth = getTextWidth(text)
+    context.fill = TEXT_COLOR
+    context.fillText(text, (WIDTH / 2) - (textWidth / 2), HEIGHT / 2 - 24.toDouble())
+}
+
+private fun Game.endGame() {
+    timer?.cancel()
+    timer = null
+    inProgress = false
+    gameOver = true
+}
+
+private fun getTextWidth(string: String): Double {
+    val text = Text(string)
+    Scene(Group(text))
+    text.applyCss()
+    return text.layoutBounds.width
+}
+
+private fun Game.createTask() = object : TimerTask() {
+    override fun run() {
+        if (inProgress) {
+            snake.snakeUpdate()
+            if (snake.isCollidedWithWall) {
+                endGame()
+            } else if (snake.isTouchTheTail()) {
+                endGame()
+            }
+            if (grid.touchFood(snake)) {
+                snake.addTail()
+                grid.addFood()
+            }
+        }
+    }
+}
+
