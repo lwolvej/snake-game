@@ -37,18 +37,21 @@ class Game : Application() {
 
     override fun start(primaryStage: Stage?) {
 
+        //初始化格点
         grid = Grid(
             width = WIDTH,
             height = HEIGHT,
             pixelsPerSquare = BLOCK_SIZE
         )
 
+        //初始化蛇
         snake = Snake(
             width = WIDTH,
             height = HEIGHT,
             blockSize = BLOCK_SIZE
         )
 
+        //初始化蛇的头结点
         snake.headLocation = Point(
             x = BLOCK_SIZE,
             y = BLOCK_SIZE
@@ -57,16 +60,20 @@ class Game : Application() {
         val canvas = Canvas(WIDTH.toDouble(), HEIGHT.toDouble())
         context = canvas.graphicsContext2D
 
-
+        //button的设置
         val button = Button().apply {
-            text = BUTTON_NAME
-            minHeight = BUTTON_HEIGHT
-            minWidth = BUTTON_WIDTH
+            text = BUTTON_NAME // 名称
+            minHeight = BUTTON_HEIGHT  //最小高度
+            minWidth = BUTTON_WIDTH //最小长度
+            //设置按钮动作
             setOnAction {
+                //开始游戏
                 inProgress = true
+                //游戏结束为false
                 gameOver = false
+                //设置游戏开始不可见
                 isVisible = false
-
+                //如果timer为null将其初始化
                 if (timer == null) {
                     timerTask = createTask()
                     timer = Timer(TIMER_NAME)
@@ -76,6 +83,7 @@ class Game : Application() {
             }
         }
 
+        //vBox（放置button）的设置
         val vBox = VBox().apply {
             prefWidthProperty().bind(canvas.widthProperty())
             prefHeightProperty().bind(canvas.heightProperty())
@@ -83,13 +91,17 @@ class Game : Application() {
             children.add(button)
         }
 
+        //将画布和vBox加入root
         val root = Group().apply {
             children.addAll(canvas, vBox)
         }
 
+        //设置scene
         val myScene = Scene(root).apply {
             setOnKeyPressed {
+                //判断键盘的按键
                 when (it.code) {
+                    //如果为上或者w，就往上走，如果此时蛇的方向是向下，则不允许。为啥？自己去掉if然后试试看
                     KeyCode.UP, KeyCode.W -> {
                         if (snake.direction != Direction.DOWN) {
                             snake.direction = Direction.UP
@@ -110,11 +122,17 @@ class Game : Application() {
                             snake.direction = Direction.RIGHT
                         }
                     }
+                    //如果按了其他按键则暂停
                     else -> {
-                        timerTask = createTask()
-                        timer = Timer(TIMER_NAME)
-                        timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
-                        paused = true
+                        if (paused) {
+                            timerTask = createTask()
+                            timer = Timer(TIMER_NAME)
+                            timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
+                            paused = false
+                        } else {
+                            timer?.cancel()
+                            paused = true
+                        }
                     }
                 }
             }
@@ -163,6 +181,7 @@ class Game : Application() {
 
 }
 
+//绘制食物
 private fun Game.drawFood() {
     context.fill = FOOD_COLOR
     context.fillRect(
@@ -173,6 +192,7 @@ private fun Game.drawFood() {
     )
 }
 
+//绘制蛇
 private fun Game.drawSnake() {
     context.fill = SNAKE_COLOR
     context.fillRect(
@@ -191,6 +211,7 @@ private fun Game.drawSnake() {
     }
 }
 
+//绘制地图
 private fun Game.drawGrid() {
     context.fill = BLOCK_COLOR
     context.fillRect(0.0, 0.0, WIDTH.toDouble(), HEIGHT.toDouble())
@@ -207,6 +228,7 @@ private fun Game.drawGrid() {
     }
 }
 
+//展示结束的弹窗
 private fun Game.showEndGameAlert() {
     val text = text(snake.tail.size + 1)
     val textWidth = getTextWidth(text)
@@ -214,6 +236,7 @@ private fun Game.showEndGameAlert() {
     context.fillText(text, (WIDTH / 2) - (textWidth / 2), HEIGHT / 2 - 24.toDouble())
 }
 
+//结束游戏
 private fun Game.endGame() {
     timer?.cancel()
     timer = null
@@ -221,6 +244,7 @@ private fun Game.endGame() {
     gameOver = true
 }
 
+//获取结束文字的宽度
 private fun getTextWidth(string: String): Double {
     val text = Text(string)
     Scene(Group(text))
@@ -228,6 +252,7 @@ private fun getTextWidth(string: String): Double {
     return text.layoutBounds.width
 }
 
+//创建任务
 private fun Game.createTask() = object : TimerTask() {
     override fun run() {
         if (inProgress) {
