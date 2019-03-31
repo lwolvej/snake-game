@@ -7,4 +7,3 @@
 ![snake_image](screenshot/snake.png)
 
 <big>Welcome start or fork or pull an issue to me!</big>
-屏幕快照 2019-03-31 下午10.28.21
