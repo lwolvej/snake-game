@@ -1,6 +1,7 @@
 package org.lwolvej.snakegame
 
 import java.util.*
+import kotlin.math.hypot
 
 //点，x和y表示
 data class Point(val x: Int, val y: Int)
@@ -44,18 +45,15 @@ fun Grid.touchFood(snake: Snake) = snake.headLocation == food.point
 fun Grid.addFood() {
     //设置食物随机出现在各点
     val random = Random()
-    var y = Math.round(random.nextInt(width).toDouble() / pixelsPerSquare) * pixelsPerSquare
-    var x = Math.round(random.nextInt(height).toDouble() / pixelsPerSquare) * pixelsPerSquare
+
+    var y = Math.round(random.nextInt(height).toDouble() / pixelsPerSquare) * pixelsPerSquare
+    var x = Math.round(random.nextInt(width).toDouble() / pixelsPerSquare) * pixelsPerSquare
 
     if (y >= height) {
-        y = (height - 3).toLong()
-    } else if (y < 0) {
-        y = (height + 3).toLong()
+        y -= pixelsPerSquare
     }
     if (x >= width) {
-        x = (width - 3).toLong()
-    } else if (x < 0) {
-        x = (width + 3).toLong()
+        x -= pixelsPerSquare
     }
     //替换成新的food
     food = Food(Point(x.toInt(), y.toInt()))
