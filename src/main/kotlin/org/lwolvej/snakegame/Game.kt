@@ -234,7 +234,7 @@ private fun Game.showEndGameAlert() {
     val text = text(snake.tail.size + 1)
     val textWidth = getTextWidth(text)
     context.fill = TEXT_COLOR
-    context.fillText(text, (WIDTH / 2) - (textWidth / 2), HEIGHT / 2 - 24.toDouble())
+    context.fillText(text, (WIDTH / 2) - (textWidth / 2), HEIGHT / 2 - 48.toDouble())
 }
 
 //结束游戏

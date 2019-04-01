@@ -3,10 +3,10 @@ package org.lwolvej.snakegame
 import javafx.scene.paint.Color
 
 //地图宽度
-const val WIDTH = 400
+const val WIDTH = 600
 
 //地图高度
-const val HEIGHT = 400
+const val HEIGHT = 600
 
 //按钮宽度
 const val BUTTON_WIDTH = 100.0
@@ -48,4 +48,7 @@ val LINE_COLOR = Color.rgb(233, 230, 239)!!
 val TEXT_COLOR = Color.BLACK!!
 
 //结束字体，用了一下lambda
-val text = { str: Int -> "游戏结束!得分:$str!" }
+val text = { str: Int ->
+    """游戏结束
+    |得分:$str""".trimMargin()
+}
