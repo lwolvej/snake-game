@@ -1,7 +1,7 @@
 package org.lwolvej.snakegame
 
 import java.util.*
-import kotlin.math.hypot
+import java.util.concurrent.ConcurrentLinkedDeque
 
 //点，x和y表示
 data class Point(val x: Int, val y: Int)
@@ -18,7 +18,7 @@ enum class Direction {
 data class Snake(
     var direction: Direction = Direction.RIGHT, //方向，默认为右边
     val point: Point = Point(0, 0), //所在点，默认0，0
-    val tail: MutableList<Point> = ArrayList(), //处头部格点之外的其他点的队列
+    val tail: Deque<Point> = ConcurrentLinkedDeque(), //处头部格点之外的其他点的队列，双端队列
     var isCollidedWithWall: Boolean = false, //判断是否碰到边界
     var headLocation: Point = Point(0, 0), // 头部格点所在位置
     val width: Int, //地图的宽度
@@ -35,9 +35,7 @@ data class Grid(
 )
 
 //重置食物
-fun Grid.foodRest() {
-    food = Food(Point(width / 2, height / 2))
-}
+fun Grid.foodRest() = run { food = Food(Point(width / 2, height / 2)) }
 
 //是否碰到食物
 fun Grid.touchFood(snake: Snake) = snake.headLocation == food.point
@@ -63,8 +61,8 @@ fun Grid.addFood() {
 fun Snake.snakeUpdate() {
     //如果长度不是空的，那么就需要删除最后的一个点和添加头部之后点到最前面
     if (tail.isNotEmpty()) {
-        tail.removeAt(tail.size - 1)
-        tail.add(0, Point(headLocation.x, headLocation.y))
+        tail.removeLast()
+        tail.offerFirst(Point(headLocation.x, headLocation.y))
     }
     //判断方向，作出不同反应
     when (direction) {
@@ -101,20 +99,8 @@ fun Snake.snakeUpdate() {
 }
 
 //判断是否碰自己
-fun Snake.isTouchTheTail(): Boolean {
-    var isTouch = false
-    for (element in tail) {
-        //遍历，碰到队列中节点，则表示碰到自己
-        if (headLocation == element) {
-            isTouch = true
-            break
-        }
-    }
-    return isTouch
-}
+fun Snake.isTouchTheTail() = tail.contains(headLocation)
 
-//添加长度
-fun Snake.addTail() {
-    //添加新的格点到队列中
-    tail.add(0, Point(headLocation.x, headLocation.y))
-}
+//添加长度添加新的格点到队列中
+fun Snake.addTail() = tail.offerFirst(Point(headLocation.x, headLocation.y))
+

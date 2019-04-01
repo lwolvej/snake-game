@@ -14,7 +14,6 @@ import javafx.scene.text.Text
 import javafx.stage.Stage
 import java.util.*
 
-
 class Game : Application() {
 
     lateinit var context: GraphicsContext
@@ -138,8 +137,10 @@ class Game : Application() {
             }
         }
 
+        //绘制地图
         drawGrid()
 
+        //展示stage
         primaryStage?.apply {
             title = STAGE_NAME
             scene = myScene
@@ -201,10 +202,10 @@ private fun Game.drawSnake() {
         BLOCK_SIZE.toDouble(),
         BLOCK_SIZE.toDouble()
     )
-    for (element in snake.tail) {
+    snake.tail.forEach {
         context.fillRect(
-            element.x.toDouble(),
-            element.y.toDouble(),
+            it.x.toDouble(),
+            it.y.toDouble(),
             BLOCK_SIZE.toDouble(),
             BLOCK_SIZE.toDouble()
         )
@@ -255,13 +256,13 @@ private fun getTextWidth(string: String): Double {
 //创建任务
 private fun Game.createTask() = object : TimerTask() {
     override fun run() {
+        //如果在游戏中
         if (inProgress) {
+            //更新蛇
             snake.snakeUpdate()
-            if (snake.isCollidedWithWall) {
-                endGame()
-            } else if (snake.isTouchTheTail()) {
-                endGame()
-            }
+            //如果蛇碰到墙或者碰到自己, 结束游戏
+            if (snake.isCollidedWithWall || snake.isTouchTheTail()) endGame()
+            //如果蛇碰到食物：添加格点，场景添加食物
             if (grid.touchFood(snake)) {
                 snake.addTail()
                 grid.addFood()
