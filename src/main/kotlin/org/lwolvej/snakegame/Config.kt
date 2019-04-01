@@ -47,7 +47,7 @@ val LINE_COLOR = Color.rgb(233, 230, 239)!!
 //字体颜色
 val TEXT_COLOR = Color.BLACK!!
 
-//结束字体，用了一下lambda
+//结束字体
 val text = { str: Int ->
     """游戏结束
     |得分:$str""".trimMargin()
