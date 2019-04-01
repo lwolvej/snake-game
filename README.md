@@ -10,6 +10,7 @@ Use kotlin and JavaFX build an awesome snake game!
 ### How to run
 Make sure you have gradle in local.  
 Then in project content run `gradle run`.  
+You also can change the game number in config.kt!  
 Have fun!
 
 ### Last
