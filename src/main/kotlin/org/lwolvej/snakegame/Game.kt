@@ -73,9 +73,9 @@ class Game : Application() {
                 //设置游戏开始不可见
                 isVisible = false
                 //如果timer为null将其初始化
-                if (timer == null) {
+                timer ?: apply {
                     timerTask = createTask()
-                    timer = Timer(TIMER_NAME)
+                    timer = Timer()
                     timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
                     animationTimer.start()
                 }
@@ -125,7 +125,7 @@ class Game : Application() {
                     else -> {
                         if (paused) {
                             timerTask = createTask()
-                            timer = Timer(TIMER_NAME)
+                            timer = Timer()
                             timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
                             paused = false
                         } else {
@@ -172,7 +172,7 @@ class Game : Application() {
         animationTimer.start()
 
         timerTask = createTask()
-        timer = Timer(TIMER_NAME)
+        timer = Timer()
         timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
     }
 
