@@ -130,6 +130,7 @@ class Game : Application() {
                             paused = false
                         } else {
                             timer?.cancel()
+                            timer = null
                             paused = true
                         }
                     }
@@ -178,6 +179,7 @@ class Game : Application() {
 
     override fun stop() {
         timer?.cancel()
+        timer = null
     }
 
 }
