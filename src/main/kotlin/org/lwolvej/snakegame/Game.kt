@@ -185,15 +185,17 @@ class Game : Application() {
 }
 
 //绘制食物
-private fun Game.drawFood() {
-    context.fill = FOOD_COLOR
-    context.fillRect(
-        grid.food.point.x.toDouble(),
-        grid.food.point.y.toDouble(),
-        BLOCK_SIZE.toDouble(),
-        BLOCK_SIZE.toDouble()
-    )
-}
+private fun Game.drawFood() =
+    context.apply {
+        fill = FOOD_COLOR
+        fillRect(
+            grid.food.point.x.toDouble(),
+            grid.food.point.y.toDouble(),
+            BLOCK_SIZE.toDouble(),
+            BLOCK_SIZE.toDouble()
+        )
+    }
+
 
 //绘制蛇
 private fun Game.drawSnake() {
