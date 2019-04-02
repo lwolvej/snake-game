@@ -8,6 +8,12 @@ const val WIDTH = 800
 //地图高度
 const val HEIGHT = 800
 
+//宽度double类型
+const val WIDTH_DOUBLE = WIDTH.toDouble()
+
+//高度double类型
+const val HEIGHT_DOUBLE = HEIGHT.toDouble()
+
 //按钮宽度
 const val BUTTON_WIDTH = 100.0
 
@@ -16,6 +22,9 @@ const val BUTTON_HEIGHT = 36.0
 
 //单个格点的大小
 const val BLOCK_SIZE = 40
+
+//单个格点大小double类型
+const val BLOCK_SIZE_DOUBLE = BLOCK_SIZE.toDouble()
 
 //更新的频率，也可以认为蛇的速度
 const val UPDATE_PERIOD = 100L

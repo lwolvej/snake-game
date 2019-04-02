@@ -16,47 +16,27 @@ import java.util.*
 
 class Game : Application() {
 
+    private lateinit var timerTask: TimerTask
+
     lateinit var context: GraphicsContext
-
-    lateinit var snake: Snake
-
-    lateinit var grid: Grid
 
     lateinit var animationTimer: AnimationTimer
 
-    var timer: Timer? = null
+    private var paused = false
 
-    private lateinit var timerTask: TimerTask
+    var snake: Snake = Snake()
+
+    val food: Food = Food()
+
+    var timer: Timer? = null
 
     var inProgress = false
 
     var gameOver = false
 
-    private var paused = false
-
     override fun start(primaryStage: Stage?) {
 
-        //初始化格点
-        grid = Grid(
-            width = WIDTH,
-            height = HEIGHT,
-            pixelsPerSquare = BLOCK_SIZE
-        )
-
-        //初始化蛇
-        snake = Snake(
-            width = WIDTH,
-            height = HEIGHT,
-            blockSize = BLOCK_SIZE
-        )
-
-        //初始化蛇的头结点
-        snake.headLocation = Point(
-            x = BLOCK_SIZE,
-            y = BLOCK_SIZE
-        )
-
-        val canvas = Canvas(WIDTH.toDouble(), HEIGHT.toDouble())
+        val canvas = Canvas(WIDTH_DOUBLE, HEIGHT_DOUBLE)
         context = canvas.graphicsContext2D
 
         //button的设置
@@ -157,21 +137,12 @@ class Game : Application() {
                     animationTimer.stop()
                     showEndGameAlert()
                     button.isVisible = true
-                    grid.foodRest()
-                    snake = Snake(
-                        width = WIDTH,
-                        height = HEIGHT,
-                        blockSize = BLOCK_SIZE
-                    )
-                    snake.headLocation = Point(
-                        x = BLOCK_SIZE,
-                        y = BLOCK_SIZE
-                    )
+                    food.foodRest()
+                    snake = Snake()
                 }
             }
         }
         animationTimer.start()
-
         timerTask = createTask()
         timer = Timer()
         timer?.scheduleAtFixedRate(timerTask, UPDATE_DELAY, UPDATE_PERIOD)
@@ -189,10 +160,10 @@ private fun Game.drawFood() =
     context.apply {
         fill = FOOD_COLOR
         fillRect(
-            grid.food.point.x.toDouble(),
-            grid.food.point.y.toDouble(),
-            BLOCK_SIZE.toDouble(),
-            BLOCK_SIZE.toDouble()
+            food.point.x.toDouble(),
+            food.point.y.toDouble(),
+            BLOCK_SIZE_DOUBLE,
+            BLOCK_SIZE_DOUBLE
         )
     }
 
@@ -203,15 +174,15 @@ private fun Game.drawSnake() {
     context.fillRect(
         snake.headLocation.x.toDouble(),
         snake.headLocation.y.toDouble(),
-        BLOCK_SIZE.toDouble(),
-        BLOCK_SIZE.toDouble()
+        BLOCK_SIZE_DOUBLE,
+        BLOCK_SIZE_DOUBLE
     )
     snake.tail.forEach {
         context.fillRect(
             it.x.toDouble(),
             it.y.toDouble(),
-            BLOCK_SIZE.toDouble(),
-            BLOCK_SIZE.toDouble()
+            BLOCK_SIZE_DOUBLE,
+            BLOCK_SIZE_DOUBLE
         )
     }
 }
@@ -219,17 +190,17 @@ private fun Game.drawSnake() {
 //绘制地图
 private fun Game.drawGrid() {
     context.fill = BLOCK_COLOR
-    context.fillRect(0.0, 0.0, WIDTH.toDouble(), HEIGHT.toDouble())
+    context.fillRect(0.0, 0.0, WIDTH_DOUBLE, HEIGHT_DOUBLE)
 
     context.stroke = LINE_COLOR
     context.lineWidth = 0.5
 
     for (element in 0 until WIDTH step BLOCK_SIZE) {
-        context.strokeLine(element.toDouble(), 0.0, element.toDouble(), element + HEIGHT.toDouble())
+        context.strokeLine(element.toDouble(), 0.0, element.toDouble(), element + HEIGHT_DOUBLE)
     }
 
     for (element in 0 until HEIGHT step BLOCK_SIZE) {
-        context.strokeLine(0.0, element.toDouble(), element + HEIGHT.toDouble(), element.toDouble())
+        context.strokeLine(0.0, element.toDouble(), element + HEIGHT_DOUBLE, element.toDouble())
     }
 }
 
@@ -267,9 +238,9 @@ private fun Game.createTask() = object : TimerTask() {
             //如果蛇碰到墙或者碰到自己, 结束游戏
             if (snake.isCollidedWithWall || snake.isTouchTheTail()) endGame()
             //如果蛇碰到食物：添加格点，场景添加食物
-            if (grid.touchFood(snake)) {
+            if (food.touchFood(snake)) {
                 snake.addTail()
-                grid.addFood()
+                food.addFood()
             }
         }
     }
